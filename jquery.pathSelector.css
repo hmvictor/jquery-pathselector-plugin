@@ -1,0 +1,54 @@
+.pathSelector{
+    padding:0px;
+	margin:0px;
+	border-spacing:0px;
+	border-collapse:collapse;
+}
+
+.pathSelector a{
+	color:black;
+	text-decoration:none;
+	width:100%;
+	border:none;
+	border-spacing:0px;
+	border-left:solid 1px white;
+	border-right:solid 1px white;
+}
+
+.pathSelector .level{
+    border-collapse:collapse;
+}
+
+.pathSelector .level a:hover{
+    border-collapse:collapse;
+	border:solid 1px silver;
+}
+
+.pathSelector .arrowButton a{
+    padding:0px;
+	background-image:url("arrowrgt.gif");
+	background-position:center;
+	background-repeat:no-repeat;
+	border:none;
+	width:13px;
+	height:100%;
+	display:inline-block;
+	color:white;
+}
+
+.pathSelector .arrowButton .pressed{
+   	background-image:url("arrowdwn.gif");
+	color: #cfe2f5;
+}
+
+.pathSelector .arrowButton a:hover{
+	color: #cfe2f5;
+}
+
+.pathSelector a:hover{
+    background-color: #cfe2f5;
+}
+
+.pathLevel:hover{
+
+}

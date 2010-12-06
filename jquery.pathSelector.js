@@ -25,7 +25,7 @@
                 return this.each(function(index, element){
                     var pathSelector=$(this).parents(".pathSelector").get(0);
                     if(isString(parts)){
-                        pathSelector.setParts(parts.split(pathSelector.options.separator));
+                        pathSelector.setParts(parts.split($(pathSelector).data("pathSelectorData").options.separator));
                     }else{
                         pathSelector.setParts(parts);
                     }
@@ -49,45 +49,12 @@
         }
     };
 	
-    /*$.fn.pathSelectorAjax = function(options, url) {
-        return this.each(function(index, element) {
-            makePathSelector(element, options, true, url);
-        });
-    };*/
-	
-    /*$.fn.pathSelectorFixedOptions = function(optionsArray, options) {
-        return this.each(function(index, element) {
-            makePathSelector(element, options, function(value, subvalues){
-                return optionsArray[subvalues.length];
-            });
-        });
-    };
-	
-    $.fn.pathSelectorDynamicOptions = function(optionsFunc, options) {
-        return this.each(function(index, element) {
-            makePathSelector(element, options, optionsFunc);
-        });
-    };*/
-	
-    /*$.fn.pathSelectorAjaxOptions = function(url, options) {
-        return this.each(function(index, element) {
-            makePathSelector(element, options, url);
-        });
-    };*/
-
-    /*$.fn.pathSelectorValues = function(values) {
-        if(values){
-            return this.each(function(index, element) {
-                var pathSelector=$(this).parents(".pathSelector").get(0);
-                pathSelector.setValues(values);
-            });
-        }else{
-            return this.get(0).getValues();
-        }
-    };*/
-	
 
     function makePathSelector(input, pluginOptions, optionsAccesor) {
+        if($(input).data("pathSelectorData")){
+            return;
+        }
+
         if(input.name == "input"){
             return;
         }
@@ -98,11 +65,12 @@
 
 
         /* Apply the html changes to wrap the input element, insert the selector and the options menu */
-        
-        $(input).wrap("<span class='pathSelector'></span>")
-                .hide();
-
-        var pathSelector=$(input).parents(".pathSelector").get(0);
+        var pathSelector=
+            $(input).wrap("<span class='pathSelector'></span>")
+                    .hide()
+                    .parents(".pathSelector").get(0);
+        var pathSelectorData={};
+        $(input).parents(".pathSelector").data("pathSelectorData", pathSelectorData);
         $(pathSelector).append("<ul class='contextMenu'></ul>");
 
         /* Define the internal functions of the plugin. */
@@ -118,11 +86,11 @@
                 this.addOptionsExpander();
                 this.addValuePart(wrappedValue);
                 if(i > 0){
-                    valueString += pathSelector.options.separator;
+                    valueString += $(this).data("pathSelectorData").options.separator;
                 }
                 valueString += wrappedValue.value;
             }
-            pathSelector.values=parts;
+            $(this).data("pathSelectorData").values=parts;
             $(this).find("input").val(valueString);
             pathSelector.fetchOptions(valueString, function(menuOptions){
                 if(menuOptions.length > 0){
@@ -131,21 +99,17 @@
             });
         };
 
-        pathSelector.getValues=function(){
-            
-        }
-
         pathSelector.addValue=function(value){
             var wrappedValue=wrapValue(value);
             this.addValuePart(wrappedValue);
-            pathSelector.values.push(value);
+            $(this).data("pathSelectorData").values.push(value);
             var valueString=$(this).find("input").val();
             if(valueString.length > 0){
-                valueString += pathSelector.options.separator;
+                valueString += $(this).data("pathSelectorData").options.separator;
             }
             valueString += wrappedValue.value;
             $(this).find("input").val(valueString);
-            pathSelector.fetchOptions(valueString, function(menuOptions){
+            this.fetchOptions(valueString, function(menuOptions){
                 if(menuOptions.length > 0){
                    pathSelector.addOptionsExpander();
                 }
@@ -153,11 +117,12 @@
         };
         
         pathSelector.getValue=function(level){
+            var pathSelector=this;
             var valueString="";
             $(this).find("span.level").each(function(index, element){
                 if(index < level){
                     if(index > 0){
-                        valueString += pathSelector.options.separator;
+                        valueString += $(pathSelector).data("pathSelectorData").options.separator;
                     }
                     valueString += $(element).attr("value");
                     return true;
@@ -184,7 +149,7 @@
             var valueString="";
             $(pathSelector).find("span.level").each(function(index, element){
                 if(index > 0){
-                    valueString += pathSelector.options.separator;
+                    valueString += $(pathSelector).data("pathSelectorData").options.separator;
                 }
                 valueString += $(element).attr("value");
             });
@@ -206,35 +171,35 @@
             var level=$(this).find(".arrowButton").length;
             var button=$(arrow.replace("levelX", ""+level));
             $(this).append(button);
-            configureButton(this, button.get(0));
+            configureExpanderButton(this, button.get(0));
         };
 
         pathSelector.fetchOptions=function(value, callbackWhenFetched){
-            var pathSelector=this;
+            var pathSelectorData=$(this).data("pathSelectorData");
             var menuOptions=null;
-            if(pathSelector.cache[value]){
-                menuOptions=pathSelector.cache[value];
+            if(pathSelectorData.cache[value]){
+                menuOptions=pathSelectorData.cache[value];
                 callbackWhenFetched(menuOptions);
             }else{
-                if(isString(pathSelector.optionsAccesor)){
-                    $.getJSON(pathSelector.optionsAccesor, {
+                if(isString(pathSelectorData.optionsAccesor)){
+                    $.getJSON(pathSelectorData.optionsAccesor, {
                             value: value
                         }, function(options){
                             menuOptions=options;
-                            pathSelector.cache[value]=menuOptions;
+                            pathSelectorData.cache[value]=menuOptions;
                             callbackWhenFetched(menuOptions);
                     });
-                }else if(isFunction(pathSelector.optionsAccesor)){
+                }else if(isFunction(pathSelectorData.optionsAccesor)){
                     /* Transform the options if needed */
                     var subvalues;
                     if(value == ""){
                         subvalues=[];
                     }else{
-                        subvalues=value.split(pathSelector.options.separator);
+                        subvalues=value.split(pathSelectorData.options.separator);
                     }
-                    var options=pathSelector.optionsAccesor(value, subvalues);
+                    var options=pathSelectorData.optionsAccesor(value, subvalues);
                     menuOptions=options != null ? options: [];
-                    pathSelector.cache[value]=menuOptions;
+                    pathSelectorData.cache[value]=menuOptions;
                     callbackWhenFetched(menuOptions);
                 }
             }
@@ -254,20 +219,20 @@
             pathSelector.removeLastLevels(($(pathSelector).find("span.level").length -1) - $(this).attr("level"));
         });
 
-        pathSelector.options=pluginOptions;
-        pathSelector.cache=new Object();
+        pathSelectorData.options=pluginOptions;
+        pathSelectorData.cache=new Object();
         if(isFunction(optionsAccesor) || isString(optionsAccesor)){
-            pathSelector.optionsAccesor=optionsAccesor;
+            pathSelectorData.optionsAccesor=optionsAccesor;
         }else{
-            pathSelector.optionsAccesor=function(value, subvalues){
+            pathSelectorData.optionsAccesor=function(value, subvalues){
                 return optionsAccesor[subvalues.length];
             };
         }
 
         /* Set the init value (empty value) */
-        pathSelector.values=[];
-        if(pathSelector.options.initValue){
-            pathSelector.setParts(pathSelector.options.initValue);
+        pathSelectorData.values=[];
+        if(pathSelectorData.options.initValue){
+            pathSelector.setParts(pathSelectorData.options.initValue);
         }else{
             pathSelector.setParts([]);
         }
@@ -276,10 +241,6 @@
     function isFunction(o){
         return typeof o == "function";
     }
-
-//    function isArray(o){
-//        return typeof o == "Array";
-//    }
 
     function isString(o){
         return typeof o == "string";
@@ -293,7 +254,7 @@
         }
     }
 
-    function configureButton(pathSelector, expanderButton){
+    function configureExpanderButton(pathSelector, expanderButton){
         $(expanderButton).contextMenu(
         {
             menu: $(pathSelector).find(".contextMenu").get(0),
@@ -301,10 +262,10 @@
                 $(pathSelector).find("a").removeClass("pressed");
             },
             menuShown:function(arrowElement){
-                var menuOptions=pathSelector.cache[pathSelector.getValue(arrowElement.attr("level"))];
+                var menuOptions=$(pathSelector).data("pathSelectorData").cache[pathSelector.getValue(arrowElement.attr("level"))];
                 if(! menuOptions){
-                    pathSelector.fetchOptions(pathSelector.getValue(arrowElement.attr("level")), function(mOptions){
-                        pathSelector.showOptionsMenu(mOptions);
+                    pathSelector.fetchOptions(pathSelector.getValue(arrowElement.attr("level")), function(menuOptions2){
+                        pathSelector.showOptionsMenu(menuOptions2);
                     });
                 }else{
                     pathSelector.showOptionsMenu(menuOptions);

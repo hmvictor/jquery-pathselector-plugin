@@ -4,34 +4,29 @@
 	z-index: 99999;
 	border: solid 1px #CCC;
 	background: #EEE;
-	padding: 0px;
-	margin: 0px;
+	padding: 2px 3px;
+	margin: 0;
 	display: none;
-        width: 200px;
+/*        width: 200px;*/
 }
 
-.contextMenu LI {
+.contextMenu li {
 	list-style: none;
-	padding: 0px;
-	margin: 0px;
+	padding: 0;
+	margin: 0;
 }
 
-.contextMenu A {
-	color: #333;
+.contextMenu a {
 	text-decoration: none;
 	display: block;
 	line-height: 20px;
 	height: 20px;
-	background-position: 6px center;
-	background-repeat: no-repeat;
 	outline: none;
-	/*padding: 1px 5px;
-	padding-left: 28px;*/
 }
 
 .contextMenu LI.hover A {
-	color: #FFF;
-	background-color: #3399FF;
+/*	color: #FFF;
+	background-color: #3399FF;*/
 }
 
 .contextMenu LI.disabled A {

@@ -4,6 +4,7 @@
     border-spacing:0px;
     border-collapse:collapse;
     border-left: 1px solid #E1E1E1;
+    font-size: 1em;
 }
 
 .pathSelector .arrowButton, .pathSelector .level{
@@ -23,20 +24,25 @@
     border-collapse:collapse;
 }
 
+.pathSelector .level a{
+    padding: 0 3px;
+}
+
 .pathSelector .level a:hover{
 
 }
 
-.pathSelector .arrowButton a{
-    padding:0px;
+.pathSelector .ui-icon-triangle-1-e{
+    width:16px;
+    height:16px;
+    display:inline-block;
+    color:white;
+}
+
+.ui-icon-triangle-1-e{
     background-image:url("arrowrgt.gif");
     background-position:center;
     background-repeat:no-repeat;
-    border:none;
-    width:13px;
-    height:100%;
-    display:inline-block;
-    color:white;
 }
 
 .pathSelector .arrowButton .pressed{
@@ -44,13 +50,15 @@
     color: #cfe2f5;
 }
 
-.pathSelector .arrowButton a:hover{
-    color: #cfe2f5;
-}
-
-.pathSelector a:hover{
+.pathSelector .ui-state-hover{
+    color: black;
     background-color: #daedd0;
 }
+
+/*.pathSelector a:hover{
+    color: #cfe2f5;
+    background-color: #daedd0;
+}*/
 
 .pathLevel:hover{
 

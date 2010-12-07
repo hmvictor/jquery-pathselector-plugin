@@ -10,17 +10,15 @@
 
 /*
  * TODO: 
- *       Fire event when context menu is hidden.
- *       Simplify distribution
+ *       Simplify distribution.
  *
  */
 
 
 (function($){
-    var arrow="<span class='arrowButton' level='levelX'><a href='#pathArrow'>.</a></span>";
-
+    
     var methods={
-        val: function(parts) {
+        value: function(parts) {
             if(parts){
                 return this.each(function(index, element){
                     var pathSelector=$(this).parents(".pathSelector").get(0);
@@ -66,12 +64,17 @@
 
         /* Apply the html changes to wrap the input element, insert the selector and the options menu */
         var pathSelector=
-            $(input).wrap("<span class='pathSelector'></span>")
+            $(input).wrap("<span class='pathSelector ui-widget ui-state-default ui-corner-all'></span>")
                     .hide()
                     .parents(".pathSelector").get(0);
         var pathSelectorData={};
         $(input).parents(".pathSelector").data("pathSelectorData", pathSelectorData);
-        $(pathSelector).append("<ul class='contextMenu'></ul>");
+        $(pathSelector).append("<ul class='contextMenu ui-widget ui-state-default ui-corner-all'></ul>");
+        $(pathSelector).find(".level a, .arrowButton, .contextMenu a").live("mouseover", "", function(){$(this).addClass("ui-state-hover")});
+        $(pathSelector).find(".level a, .arrowButton, .contextMenu a").live("mouseout", "", function(){$(this).removeClass("ui-state-hover")});
+        $(pathSelector).find("a").live("mousedown", "", function(){$(this).addClass("ui-state-active")});
+        $(pathSelector).find("a").live("mouseup", "", function(){$(this).removeClass("ui-state-active")});
+
 
         /* Define the internal functions of the plugin. */
         
@@ -92,6 +95,7 @@
             }
             $(this).data("pathSelectorData").values=parts;
             $(this).find("input").val(valueString);
+            $(this).find("input").trigger("valueChanged", valueString);
             pathSelector.fetchOptions(valueString, function(menuOptions){
                 if(menuOptions.length > 0){
                    pathSelector.addOptionsExpander();
@@ -109,6 +113,7 @@
             }
             valueString += wrappedValue.value;
             $(this).find("input").val(valueString);
+            $(this).find("input").trigger("valueChanged", valueString);
             this.fetchOptions(valueString, function(menuOptions){
                 if(menuOptions.length > 0){
                    pathSelector.addOptionsExpander();
@@ -154,13 +159,14 @@
                 valueString += $(element).attr("value");
             });
             $(pathSelector).find("input").val(valueString);
+            $(this).find("input").trigger("valueChanged", valueString);
         }
 
         /* UI */
 
         pathSelector.addValuePart=function(o){
             var level=$(pathSelector).find("span.level").length;
-            $("<span class='level'><a href='#pathLevel'></a></span>")
+            $("<span class='level'><a href='javascript:void(0)' class=''></a></span>")
                 .appendTo(this)
                 .attr("value", o.value)
                 .attr("level", level)
@@ -169,7 +175,9 @@
         
         pathSelector.addOptionsExpander=function(){
             var level=$(this).find(".arrowButton").length;
-            var button=$(arrow.replace("levelX", ""+level));
+            var button=$("<span class='arrowButton' level=''><a href='javascript:void(0)' class='ui-icon ui-icon-triangle-1-e'></a></span>");
+            button.attr("level", level);
+//            var button=$(arrow.replace("levelX", ""+level));
             $(this).append(button);
             configureExpanderButton(this, button.get(0));
         };
@@ -281,14 +289,15 @@
     }
 
     function valueChanged(input, propName, value){
-        /* Fire jQuery Event */
-        $(input).trigger("valueChanged", value);
         /* Get options */
         $(input).parent().get(0).fetchOptions(value, function(options){
             if(options.length > 0){
                 $(input).parent().get(0).appendLevelSelector();
             }
         });
+        
+        /* Fire jQuery Event */
+        $(input).trigger("valueChanged", value);
     }
 
 })(jQuery);

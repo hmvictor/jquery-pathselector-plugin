@@ -18,6 +18,11 @@
 (function($){
     
     var methods={
+        init: function(optionsAccesor, pluginOptions) {
+            return this.each(function(index, element){
+                makePathSelector(element, pluginOptions, optionsAccesor)
+            });
+        },
         value: function(parts) {
             if(parts){
                 return this.each(function(index, element){
@@ -32,14 +37,22 @@
                 return this.each.val();
             }
         },
-        init: function(optionsAccesor, pluginOptions) {
-            return this.each(function(index, element){
-                makePathSelector(element, pluginOptions, optionsAccesor)
-            });
+        parts: function(parts){
+            var pathSelector=$(this).parents(".pathSelector").get(0);
+            if(parts){
+                return this.each(function(index, element){
+                    pathSelector.setParts(parts);
+                });
+            }else{
+                return pathSelector.getParts();
+            }
         }
     };
 
     $.fn.pathSelector = function(method) {
+        $.fn.pathSelector.defaults={
+            separator: "."
+        };
         if(methods[method]){
             return methods[method].apply(this, Array.prototype.slice.call( arguments, 1 ));
         }else{
@@ -56,10 +69,8 @@
         if(input.name == "input"){
             return;
         }
-        var defaults={
-            separator: "."
-        };
-        pluginOptions = $.extend({}, defaults, pluginOptions);
+        
+        pluginOptions = $.extend({}, $.fn.pathSelector.defaults, pluginOptions);
 
 
         /* Apply the html changes to wrap the input element, insert the selector and the options menu */
@@ -70,8 +81,8 @@
         var pathSelectorData={};
         $(input).parents(".pathSelector").data("pathSelectorData", pathSelectorData);
         $(pathSelector).append("<ul class='contextMenu ui-widget ui-state-default ui-corner-all'></ul>");
-        $(pathSelector).find(".level a, .arrowButton, .contextMenu a").live("mouseover", "", function(){$(this).addClass("ui-state-hover")});
-        $(pathSelector).find(".level a, .arrowButton, .contextMenu a").live("mouseout", "", function(){$(this).removeClass("ui-state-hover")});
+        $(pathSelector).find(".level, .arrowButton, .contextMenu a").live("mouseover", "", function(){$(this).addClass("ui-state-hover")});
+        $(pathSelector).find(".level, .arrowButton, .contextMenu a").live("mouseout", "", function(){$(this).removeClass("ui-state-hover")});
         $(pathSelector).find("a").live("mousedown", "", function(){$(this).addClass("ui-state-active")});
         $(pathSelector).find("a").live("mouseup", "", function(){$(this).removeClass("ui-state-active")});
 
@@ -103,6 +114,17 @@
             });
         };
 
+        pathSelector.getParts=function(){
+            var parts=[];
+            $(this).find(".level").each(function(index, element){
+                parts.push({
+                    value: $(element).data("value"),
+                    label: $(element).html()
+                });
+            });
+            return parts;
+        };
+
         pathSelector.addValue=function(value){
             var wrappedValue=wrapValue(value);
             this.addValuePart(wrappedValue);
@@ -124,12 +146,12 @@
         pathSelector.getValue=function(level){
             var pathSelector=this;
             var valueString="";
-            $(this).find("span.level").each(function(index, element){
+            $(this).find(".level").each(function(index, element){
                 if(index < level){
                     if(index > 0){
                         valueString += $(pathSelector).data("pathSelectorData").options.separator;
                     }
-                    valueString += $(element).attr("value");
+                    valueString += $(element).data("value");
                     return true;
                 }else{
                     return false;
@@ -152,11 +174,11 @@
                 }
             });
             var valueString="";
-            $(pathSelector).find("span.level").each(function(index, element){
+            $(pathSelector).find(".level").each(function(index, element){
                 if(index > 0){
                     valueString += $(pathSelector).data("pathSelectorData").options.separator;
                 }
-                valueString += $(element).attr("value");
+                valueString += $(element).data("value");
             });
             $(pathSelector).find("input").val(valueString);
             $(this).find("input").trigger("valueChanged", valueString);
@@ -165,19 +187,16 @@
         /* UI */
 
         pathSelector.addValuePart=function(o){
-            var level=$(pathSelector).find("span.level").length;
-            $("<span class='level'><a href='javascript:void(0)' class=''></a></span>")
+            var level=$(pathSelector).find(".level").length;
+            $("<a href='javascript:void(0)' class='level'></a>")
                 .appendTo(this)
-                .attr("value", o.value)
-                .attr("level", level)
-                .find("a").html(o.label);
+                .data("value", o.value)
+                .data("level", level)
+                .html(o.label);
         };
         
         pathSelector.addOptionsExpander=function(){
-            var level=$(this).find(".arrowButton").length;
             var button=$("<span class='arrowButton' level=''><a href='javascript:void(0)' class='ui-icon ui-icon-triangle-1-e'></a></span>");
-            button.attr("level", level);
-//            var button=$(arrow.replace("levelX", ""+level));
             $(this).append(button);
             configureExpanderButton(this, button.get(0));
         };
@@ -223,8 +242,8 @@
             $(this).find(".contextMenu").get(0).proccessHTML();
         };
 
-        $(pathSelector).find("span.level").live("click", function(){
-            pathSelector.removeLastLevels(($(pathSelector).find("span.level").length -1) - $(this).attr("level"));
+        $(pathSelector).find(".level").live("click", function(){
+            pathSelector.removeLastLevels(($(pathSelector).find(".level").length -1) - $(this).data("level"));
         });
 
         pathSelectorData.options=pluginOptions;
@@ -270,9 +289,10 @@
                 $(pathSelector).find("a").removeClass("pressed");
             },
             menuShown:function(arrowElement){
-                var menuOptions=$(pathSelector).data("pathSelectorData").cache[pathSelector.getValue(arrowElement.attr("level"))];
+                var level=getLevelOfArrow(arrowElement);
+                var menuOptions=$(pathSelector).data("pathSelectorData").cache[pathSelector.getValue(level)];
                 if(! menuOptions){
-                    pathSelector.fetchOptions(pathSelector.getValue(arrowElement.attr("level")), function(menuOptions2){
+                    pathSelector.fetchOptions(pathSelector.getValue(level), function(menuOptions2){
                         pathSelector.showOptionsMenu(menuOptions2);
                     });
                 }else{
@@ -281,11 +301,20 @@
             }
         },
         function(option, el, position){
-            var level=$(el).attr("level");
-            pathSelector.removeLastLevels($(pathSelector).find("span.level").length-level);
+            var level=getLevelOfArrow($(el));
+            pathSelector.removeLastLevels($(pathSelector).find(".level").length-level);
             pathSelector.addValue(option);
         }
         );
+    }
+
+    function getLevelOfArrow(jArrowButton){
+        var level=jArrowButton.prev(".level").data("level");
+        if(!level && level != 0){
+            level=-1;
+        }
+        level=level+1
+        return level;
     }
 
     function valueChanged(input, propName, value){

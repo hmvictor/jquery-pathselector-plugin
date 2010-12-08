@@ -1,58 +1,10 @@
-/* Generic context menu styles */
-.contextMenu {
-	position: absolute;
-	z-index: 99999;
-	border: solid 1px #CCC;
-	background: #EEE;
-	padding: 0px;
-	margin: 0px;
-	display: none;
-        width: 200px;
-}
-
-.contextMenu LI {
-	list-style: none;
-	padding: 0px;
-	margin: 0px;
-}
-
-.contextMenu A {
-	color: #333;
-	text-decoration: none;
-	display: block;
-	line-height: 20px;
-	height: 20px;
-	background-position: 6px center;
-	background-repeat: no-repeat;
-	outline: none;
-	/*padding: 1px 5px;
-	padding-left: 28px;*/
-}
-
-.contextMenu LI.hover A {
-	color: #FFF;
-	background-color: #3399FF;
-}
-
-.contextMenu LI.disabled A {
-	color: #AAA;
-	cursor: default;
-}
-
-.contextMenu LI.hover.disabled A {
-	background-color: transparent;
-}
-
-.contextMenu LI.separator {
-	border-top: solid 1px #CCC;
-}
-
 .pathSelector{
     padding:0px;
     margin:0px;
     border-spacing:0px;
     border-collapse:collapse;
     border-left: 1px solid #E1E1E1;
+    font-size: 1em;
 }
 
 .pathSelector .arrowButton, .pathSelector .level{
@@ -69,23 +21,24 @@
 }
 
 .pathSelector .level{
-    border-collapse:collapse;
+    padding: 0 3px;
 }
 
 .pathSelector .level a:hover{
 
 }
 
-.pathSelector .arrowButton a{
-    padding:0px;
+.pathSelector .ui-icon-triangle-1-e{
+    width:16px;
+    height:16px;
+    display:inline-block;
+    color:white;
+}
+
+.ui-icon-triangle-1-e{
     background-image:url("arrowrgt.gif");
     background-position:center;
     background-repeat:no-repeat;
-    border:none;
-    width:13px;
-    height:100%;
-    display:inline-block;
-    color:white;
 }
 
 .pathSelector .arrowButton .pressed{
@@ -93,14 +46,53 @@
     color: #cfe2f5;
 }
 
-.pathSelector .arrowButton a:hover{
-    color: #cfe2f5;
-}
-
-.pathSelector a:hover{
+.pathSelector .ui-state-hover{
+    color: black;
     background-color: #daedd0;
 }
 
-.pathLevel:hover{
 
+/* Generic context menu styles */
+.contextMenu {
+	position: absolute;
+	z-index: 99999;
+	border: solid 1px #CCC;
+	background: #EEE;
+	padding: 2px 3px;
+	margin: 0;
+	display: none;
+/*        width: 200px;*/
 }
+
+.contextMenu li {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.contextMenu a {
+	text-decoration: none;
+	display: block;
+	line-height: 20px;
+	height: 20px;
+	outline: none;
+}
+
+.contextMenu LI.hover A {
+/*	color: #FFF;
+	background-color: #3399FF;*/
+}
+
+.contextMenu LI.disabled A {
+	color: #AAA;
+	cursor: default;
+}
+
+.contextMenu LI.hover.disabled A {
+	background-color: transparent;
+}
+
+.contextMenu LI.separator {
+	border-top: solid 1px #CCC;
+}
+

@@ -21,10 +21,6 @@
 }
 
 .pathSelector .level{
-    border-collapse:collapse;
-}
-
-.pathSelector .level a{
     padding: 0 3px;
 }
 
@@ -53,13 +49,4 @@
 .pathSelector .ui-state-hover{
     color: black;
     background-color: #daedd0;
-}
-
-/*.pathSelector a:hover{
-    color: #cfe2f5;
-    background-color: #daedd0;
-}*/
-
-.pathLevel:hover{
-
 }
